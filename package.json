@@ -1,0 +1,22 @@
+{
+  "name": "nebula-mock",
+  "version": "0.0.1",
+  "description": "Mock server base on nebulajs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "node.js",
+    "javascript",
+    "mock"
+  ],
+  "author": {
+    "name": "DaniloShan",
+    "email": "awpszq@gmail.com"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">= 0.9"
+  }
+}
