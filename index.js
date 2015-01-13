@@ -1,32 +1,24 @@
-var gulp = require('gulp');
+var gulp = require('gulp'),
+    gutil = require('gulp-util'),
+    through = require('through2');
 
-module.exports = {
-    init: function () {
-        this.cbQueue = [];
-        var _self = this;
+function compile (model) {
+    model["age"] = +new Date();
+    return JSON.stringify(model);
+}
 
-        gulp.task('mock', function () {
-            _self.cbQueue.forEach(function (item) {
-                gulp.src(item.url)
-                    .pipe(gulp.dest(item.data().path));
-            });
-        });
+function mock () {
 
-        return this;
-    },
+    return through.obj(function (file, enc, cb) {
 
-    add: function (conf) {
-        this.cbQueue.push(conf);
-        return this;
-    },
+        var model = JSON.parse(file.contents.toString());
 
-    config: function (o) {
-        this.config = o;
+        file.contents = new Buffer(compile(model));
 
-        return this;
-    },
+        console.log(file);
 
-    listen: function () {
-        console.log('listening');
-    }
-};
+        cb(null, file);
+    });
+}
+
+module.exports = mock;
