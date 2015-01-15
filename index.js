@@ -3,70 +3,16 @@ var gulp = require('gulp'),
     through = require('through2'),
     fs = require('fs');
 
+var compile = require('./compile.js');
 var opt = {};
-var cache = {};
 
-var dataBuilder = {
-    buildString: function (min, max) {
-
-    },
-    buildNumber: function (min, max) {
-
-    },
-    buildDate: function (filter) {
-
-    }
-}
-
-function buildByVal(str) {
-    if (cache[str]) return cache[str];
-    if (!str) return str;
-
-    str = str.split('|');
-    str[0] = str[0].split(':');
-
-    var dataType = str[0][0];
-    var dataLength = str[0][1];
-    var dataFilter = str[1];
-    var lenMin = 0, lenMax;
-
-    if (!dataLength) {
-        lenMax = 10;
-    } else {
-        dataLength = dataLength.split('-');
-        if (dataLength.length = 1) {
-            lenMax = +dataLength;
-        } else {
-            lenMin = +dataLength[0];
-            lenMax = +dataLength[1];
-        }
-    }
-
-    if ('build' + dataType in dataBuilder) {
-        if (dataType !== 'Date') {
-            return dataBuilder['build' + dataType](lenMin, lenMax);
-        } else {
-            return dataBuilder['build' + dataType](dataFilter);
-        }
-    }
-
-    return str;
-}
-
-function buildByKey(o) {
-
-}
-
-function compile(model) {
-
-    return JSON.stringify(model);
-}
 
 function mock() {
 
     return through.obj(function (file, enc, cb) {
-        var model = JSON.parse(file.contents.toString());
-        file.contents = new Buffer(compile(model));
+        var template = JSON.parse(file.contents.toString());
+
+        file.contents = new Buffer(JSON.stringify(compile(template)));
 
         cb(null, file);
     });
@@ -89,7 +35,7 @@ mock.middleware = function (connect) {
             var tmpFile = '';
             var pathname = opt.dirName + req._parsedUrl.pathname;
 
-            if (apiMatch && apiMatch.length && apiMatch.index === 0 && query) {
+            if (apiMatch && apiMatch.length && apiMatch.index === 0 && query && (query.cb || query.callback)) {
                 var cbName = query.cb || query.callback;
 
                 if (cbName) {
@@ -99,9 +45,10 @@ mock.middleware = function (connect) {
                     return readStream.pipe(through.obj(function (file, env, cb) {
 
                         tmpFile = 'typeof ' + cbName + ' === "function" && '
-                        + cbName + '(' + file.toString() + ');'
+                        + cbName + '(' + JSON.stringify(compile(JSON.parse(file.toString()))) + ');'
 
-                        console.log(tmpFile, pathname);
+
+
                         fs.writeFile(pathname, tmpFile, function (err) {
                             if (err) throw err;
                             cb();
