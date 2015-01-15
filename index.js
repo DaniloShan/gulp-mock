@@ -23,7 +23,7 @@ mock.config = function (o) {
         apiPath: '',
         dirName: ''
     };
-}
+};
 
 mock.middleware = function (connect) {
     return connect()
@@ -45,7 +45,7 @@ mock.middleware = function (connect) {
                     return readStream.pipe(through.obj(function (file, env, cb) {
 
                         tmpFile = 'typeof ' + cbName + ' === "function" && '
-                        + cbName + '(' + JSON.stringify(compile(JSON.parse(file.toString()))) + ');'
+                        + cbName + '(' + JSON.stringify(compile(JSON.parse(file.toString()))) + ');';
 
 
 
@@ -59,6 +59,6 @@ mock.middleware = function (connect) {
             }
             next();
         })
-}
+};
 
 module.exports = mock;

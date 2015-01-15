@@ -8,26 +8,25 @@ var cache = {};
 var paragraph = 'williamshakespeareaprilbaptisedaprilnbwasanenglishpoetplaywrightandactorwidelyregardedasthegreatestwriterintheenglishlanguageandtheworldspreeminentdramatistheisoftencalledenglandsnationalpoetandthebardofavonnbhisextantworksincludingsomecollaborationsconsistofaboutplaysnbsonnetstwolongnarrativepoemsandafewotherversesofwhichtheauthorshipofsomeisuncertainhisplayshavebeentranslatedintoeverymajorlivinglanguageandareperformedmoreoftenthanthoseofanyotherplaywrightshakespearewasbornandbroughtupinstratforduponavonattheageofhemarriedannehathawaywithwhomhehadthreechildren:susannaandtwinshamnetandjudithbetweenandhebeganasuccessfulcareerinlondonasanactorwriterandpartownerofaplayingcompanycalledthelordchamberlainsmenlaterknownasthekingsmenheappearstohaveretiredtostratfordaroundatagewherehediedthreeyearslaterfewrecordsofshakespearesprivatelifesurviveandtherehasbeenconsiderablespeculationaboutsuchmattersashisphysicalappearancesexualityreligiousbeliefsandwhethertheworksattributedtohimwerewrittenbyothersshakespeareproducedmostofhisknownworkbetweenandnbhisearlyplaysweremainlycomediesandhistoriesandtheseworksremainregardedassomeofthebestworkproducedinthesegenreshethenwrotemainlytragediesuntilaboutincludinghamletkinglearothelloandmacbethconsideredsomeofthefinestworksintheenglishlanguageinhislastphasehewrotetragicomediesalsoknownasromancesandcollaboratedwithotherplaywrightsmanyofhisplayswerepublishedineditionsofvaryingqualityandaccuracyduringhislifetimeinjohnhemingesandhenrycondelltwofriendsandfellowactorsofshakespearepublishedthefirstfolioacollectededitionofhisdramaticworksthatincludedallbuttwooftheplaysnowrecognisedasshakespearesitwasprefacedwithapoembybenjonsoninwhichshakespeareishailedprescientlyasnotofanagebutforalltimeinthethandstcenturyhisworkhasbeenrepeatedlyadoptedandrediscoveredbynewmovementsinscholarshipandperformancehisplaysremainhighlypopulartodayandareconstantlystudiedperformedandreinterpretedindiverseculturalandpoliticalcontextsthroughouttheworld';
 var plen = paragraph.length;
 
-var dataBuilder = {
-    buildString: function (min, max) {
-        var length = _.random(min, max);
-        while (plen < length) {
-            paragraph += paragraph;
-            plen = paragraph.length
-        }
-        var start = _.random(plen - length - 1);
-        return paragraph.slice(start, start + length);
-    },
-    buildNumber: function (min, max) {
-        var length = _.random(min, max) - 1;
-        var num = _.random(0.0, 0.8);
-        num += 0.1;
-        return Math.floor((+('10e' + length) * num));
-    },
-    buildDate: function (filter) {
-        return moment().format(filter || 'YYYY-MM-DD');
+function buildString (min, max) {
+    var length = _.random(min, max);
+    while (plen < length) {
+        paragraph += paragraph;
+        plen = paragraph.length
     }
-};
+    var start = _.random(plen - length - 1);
+
+    return paragraph.slice(start, start + length);
+}
+function buildNumber (min, max) {
+    var length = _.random(min, max) - 1;
+    var num = _.random(0.0, 0.8);
+    num += 0.1;
+    return Math.floor((+('10e' + length) * num));
+}
+function buildDate (filter) {
+    return moment().format(filter || 'YYYY-MM-DD');
+}
 
 function buildByVal(str) {
     if (cache[str]) return cache[str];
@@ -54,13 +53,13 @@ function buildByVal(str) {
 
     switch (dataType) {
         case 'String':
-            return dataBuilder.buildString(lenMin, lenMax);
+            return buildString(lenMin, lenMax);
             break;
         case 'Number':
-            return dataBuilder.buildNumber(lenMin, lenMax);
+            return buildNumber(lenMin, lenMax);
             break;
         case 'Date':
-            return dataBuilder.buildDate(dataFilter);
+            return buildDate(dataFilter);
             break;
     }
 
