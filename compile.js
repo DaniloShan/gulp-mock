@@ -1,4 +1,3 @@
-// TODO: filter support
 // TODO: unit test
 // TODO: docs
 
@@ -7,6 +6,61 @@ var moment = require('moment');
 var cache = {};
 var paragraph = 'williamshakespeareaprilbaptisedaprilnbwasanenglishpoetplaywrightandactorwidelyregardedasthegreatestwriterintheenglishlanguageandtheworldspreeminentdramatistheisoftencalledenglandsnationalpoetandthebardofavonnbhisextantworksincludingsomecollaborationsconsistofaboutplaysnbsonnetstwolongnarrativepoemsandafewotherversesofwhichtheauthorshipofsomeisuncertainhisplayshavebeentranslatedintoeverymajorlivinglanguageandareperformedmoreoftenthanthoseofanyotherplaywrightshakespearewasbornandbroughtupinstratforduponavonattheageofhemarriedannehathawaywithwhomhehadthreechildren:susannaandtwinshamnetandjudithbetweenandhebeganasuccessfulcareerinlondonasanactorwriterandpartownerofaplayingcompanycalledthelordchamberlainsmenlaterknownasthekingsmenheappearstohaveretiredtostratfordaroundatagewherehediedthreeyearslaterfewrecordsofshakespearesprivatelifesurviveandtherehasbeenconsiderablespeculationaboutsuchmattersashisphysicalappearancesexualityreligiousbeliefsandwhethertheworksattributedtohimwerewrittenbyothersshakespeareproducedmostofhisknownworkbetweenandnbhisearlyplaysweremainlycomediesandhistoriesandtheseworksremainregardedassomeofthebestworkproducedinthesegenreshethenwrotemainlytragediesuntilaboutincludinghamletkinglearothelloandmacbethconsideredsomeofthefinestworksintheenglishlanguageinhislastphasehewrotetragicomediesalsoknownasromancesandcollaboratedwithotherplaywrightsmanyofhisplayswerepublishedineditionsofvaryingqualityandaccuracyduringhislifetimeinjohnhemingesandhenrycondelltwofriendsandfellowactorsofshakespearepublishedthefirstfolioacollectededitionofhisdramaticworksthatincludedallbuttwooftheplaysnowrecognisedasshakespearesitwasprefacedwithapoembybenjonsoninwhichshakespeareishailedprescientlyasnotofanagebutforalltimeinthethandstcenturyhisworkhasbeenrepeatedlyadoptedandrediscoveredbynewmovementsinscholarshipandperformancehisplaysremainhighlypopulartodayandareconstantlystudiedperformedandreinterpretedindiverseculturalandpoliticalcontextsthroughouttheworld';
 var plen = paragraph.length;
+var Canvas = require('canvas'),
+    canvas = new Canvas(200, 200),
+    ctx = canvas.getContext('2d');
+
+function replace (target, source) {
+    if (source) {
+        target += '';
+
+        var item = null, pointer = 0;
+        var matchResult = source.match(/([x]+)/g);
+        var i = 0, il = matchResult.length, tmp;
+
+        for (; i < il; i++) {
+            item = matchResult[i];
+            tmp = target.slice(pointer, pointer + item.length);
+            pointer = pointer + item.length;
+            source = source.replace(item, tmp);
+        }
+
+        if (isNaN(+source)) {
+            return source;
+        }
+
+        return +source;
+    }
+
+    return target;
+}
+function getImageSize (dataFilter) {
+    var width = 100, height = 100;
+    var minW = width, maxW = width,
+        minH = height, maxH = height;
+    var tmp = [];
+    if (dataFilter) {
+        tmp = dataFilter.split('-');
+        if (!tmp) {
+            return [width, height];
+        } else if (tmp.length === 1) {
+            tmp[1] = tmp[0];
+        }
+
+        minW = tmp[0].split('x')[0];
+        maxW = tmp[1].split('x')[0];
+
+        minH = tmp[0].split('x')[1];
+        maxH = tmp[1].split('x')[1];
+
+        width = _.random(minW, maxW);
+        height = _.random(minH, maxH);
+
+        return [width, height];
+    }
+
+    return [width, height];
+}
 
 function buildString (min, max) {
     var length = _.random(min, max);
@@ -18,14 +72,33 @@ function buildString (min, max) {
 
     return paragraph.slice(start, start + length);
 }
-function buildNumber (min, max) {
+function buildNumber (min, max, dataFilter) {
     var length = _.random(min, max) - 1;
     var num = _.random(0.0, 0.8);
     num += 0.1;
-    return Math.floor((+('10e' + length) * num));
+    num = Math.floor((+('10e' + length) * num));
+
+    return replace(num, dataFilter);
 }
 function buildDate (filter) {
     return moment().format(filter || 'YYYY-MM-DD');
+}
+function buildImage (dataFilter) {
+    var size = getImageSize(dataFilter);
+    var width = size[0], height = size[1];
+
+    canvas.width = width;
+    canvas.height = height;
+
+    ctx.fillStyle = 'rgba(' + _.random(0, 255) + ', ' + _.random(0, 255) + ', ' + _.random(0, 255) + ', .4)';
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = '#666';
+    ctx.font = (width / 4 > 12 ? width / 4 : 12) + 'px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = "middle";
+    ctx.fillText(width + 'x' + height, width/2, height/2);
+
+    return canvas.toDataURL('image/png');
 }
 
 function buildByVal(str) {
@@ -56,10 +129,13 @@ function buildByVal(str) {
             return buildString(lenMin, lenMax);
             break;
         case 'Number':
-            return buildNumber(lenMin, lenMax);
+            return buildNumber(lenMin, lenMax, dataFilter);
             break;
         case 'Date':
             return buildDate(dataFilter);
+            break;
+        case 'Image':
+            return buildImage(dataFilter);
             break;
     }
 
