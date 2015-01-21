@@ -1,32 +1,67 @@
-var gulp = require('gulp');
+var gulp = require('gulp'),
+    gutil = require('gulp-util'),
+    through = require('through2'),
+    fs = require('fs');
 
-module.exports = {
-    init: function () {
-        this.cbQueue = [];
-        var _self = this;
+var compile = require('./compile.js');
+var opt = {};
 
-        gulp.task('mock', function () {
-            _self.cbQueue.forEach(function (item) {
-                gulp.src(item.url)
-                    .pipe(gulp.dest(item.data().path));
-            });
-        });
 
-        return this;
-    },
+function mock() {
 
-    add: function (conf) {
-        this.cbQueue.push(conf);
-        return this;
-    },
+    return through.obj(function (file, enc, cb) {
+        var template = JSON.parse(file.contents.toString());
 
-    config: function (o) {
-        this.config = o;
+        file.contents = new Buffer(JSON.stringify(compile(template)));
 
-        return this;
-    },
+        cb(null, file);
+    });
+}
 
-    listen: function () {
-        console.log('listening');
-    }
+mock.config = function (o) {
+    opt = o || {
+        apiPath: '',
+        dirName: ''
+    };
 };
+
+mock.middleware = function (connect) {
+    return connect()
+        .use(connect.query())
+        .use(function (req, res, next) {
+            var reg = new RegExp('\/' + (opt.apiPath));
+            var apiMatch = req.url.match(reg);
+            var query = req.query;
+            var tmpFile = '';
+            var pathname = opt.dirName + req._parsedUrl.pathname;
+
+            if (apiMatch && apiMatch.length && apiMatch.index === 0) {
+                var cbName = query.cb || query.callback;
+
+                if (cbName) {
+                    res.setHeader('content-type', 'application/javascript');
+                }
+
+                var readStream = fs.createReadStream(pathname.replace(opt.apiPath, 'source'));
+
+                return readStream.pipe(through.obj(function (file, env, cb) {
+
+                    if (cbName) {
+                        tmpFile = 'typeof ' + cbName + ' === "function" && '
+                        + cbName + '(' + JSON.stringify(compile(JSON.parse(file.toString()))) + ');';
+                    } else {
+                        tmpFile = JSON.stringify(compile(JSON.parse(file.toString())));
+                    }
+
+                    fs.writeFile(pathname, tmpFile, function (err) {
+                        if (err) throw err;
+                        cb();
+                        next();
+                    });
+                }));
+            }
+            next();
+        })
+};
+
+module.exports = mock;

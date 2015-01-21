@@ -1,7 +1,7 @@
 {
-  "name": "nebula-mock",
-  "version": "0.0.1",
-  "description": "Mock server base on nebulajs.",
+  "name": "gulp-mock",
+  "version": "0.0.2",
+  "description": "Just mock data for test.",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
@@ -9,7 +9,8 @@
   "keywords": [
     "node.js",
     "javascript",
-    "mock"
+    "mock",
+    "gulp"
   ],
   "author": {
     "name": "DaniloShan",
@@ -18,5 +19,20 @@
   "license": "MIT",
   "engines": {
     "node": ">= 0.9"
+  },
+  "homepage": "https://github.com/DaniloShan/Nebula-Mock",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DaniloShan/Nebula-Mock.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DaniloShan/Nebula-Mock/issues"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.10",
+    "gulp-util": "^3.0.2",
+    "lodash": "^2.4.1",
+    "moment": "^2.9.0",
+    "through2": "^0.6.3"
   }
 }
