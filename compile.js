@@ -1,5 +1,6 @@
 // TODO: unit test
 // TODO: docs
+// TODO: zh support
 
 var _ = require('lodash');
 var moment = require('moment');
@@ -10,31 +11,50 @@ var Canvas = require('canvas'),
     canvas = new Canvas(200, 200),
     ctx = canvas.getContext('2d');
 
-function replace (target, source) {
-    if (source) {
-        target += '';
+function compile(template) {
+    var result = {}, item;
+
+    _.forOwn(template, function (val, key) {
+        if (~key.indexOf(':') || ~key.indexOf('|')) {
+            item = compile.buildByKey(key, val);
+            result[item[0]] = item[1];
+        } else {
+            if (_.isObject(val)) {
+                result[key] = compile(val);
+            } else {
+                result[key] = compile.buildByVal(val);
+            }
+        }
+    });
+
+    return result;
+}
+
+compile.replace = function  (source, origin) {
+    if (origin) {
+        source += '';
 
         var item = null, pointer = 0;
-        var matchResult = source.match(/([x]+)/g);
+        var matchResult = origin.match(/([x]+)/g);
         var i = 0, il = matchResult.length, tmp;
 
         for (; i < il; i++) {
             item = matchResult[i];
-            tmp = target.slice(pointer, pointer + item.length);
+            tmp = source.slice(pointer, pointer + item.length);
             pointer = pointer + item.length;
-            source = source.replace(item, tmp);
+            origin = origin.replace(item, tmp);
         }
 
-        if (isNaN(+source)) {
-            return source;
+        if (isNaN(+origin)) {
+            return origin;
         }
 
-        return +source;
+        return +origin;
     }
 
-    return target;
+    return source;
 }
-function getImageSize (dataFilter) {
+compile.getImageSize = function  (dataFilter) {
     var width = 100, height = 100;
     var minW = width, maxW = width,
         minH = height, maxH = height;
@@ -62,7 +82,7 @@ function getImageSize (dataFilter) {
     return [width, height];
 }
 
-function buildString (min, max) {
+compile.buildString = function  (min, max) {
     var length = _.random(min, max);
     while (plen < length) {
         paragraph += paragraph;
@@ -72,19 +92,19 @@ function buildString (min, max) {
 
     return paragraph.slice(start, start + length);
 }
-function buildNumber (min, max, dataFilter) {
+compile.buildNumber = function  (min, max, dataFilter) {
     var length = _.random(min, max) - 1;
     var num = _.random(0.0, 0.8);
     num += 0.1;
     num = Math.floor((+('10e' + length) * num));
 
-    return replace(num, dataFilter);
+    return compile.replace(num, dataFilter);
 }
-function buildDate (filter) {
+compile.buildDate = function  (filter) {
     return moment().format(filter || 'YYYY-MM-DD');
 }
-function buildImage (dataFilter) {
-    var size = getImageSize(dataFilter);
+compile.buildImage = function  (dataFilter) {
+    var size = compile.getImageSize(dataFilter);
     var width = size[0], height = size[1];
 
     canvas.width = width;
@@ -100,8 +120,7 @@ function buildImage (dataFilter) {
 
     return canvas.toDataURL('image/png');
 }
-
-function buildByVal(str) {
+compile.buildByVal = function (str) {
     if (cache[str]) return cache[str];
     if (!str) return str;
 
@@ -126,23 +145,22 @@ function buildByVal(str) {
 
     switch (dataType) {
         case 'String':
-            return buildString(lenMin, lenMax);
+            return compile.buildString(lenMin, lenMax);
             break;
         case 'Number':
-            return buildNumber(lenMin, lenMax, dataFilter);
+            return compile.buildNumber(lenMin, lenMax, dataFilter);
             break;
         case 'Date':
-            return buildDate(dataFilter);
+            return compile.buildDate(dataFilter);
             break;
         case 'Image':
-            return buildImage(dataFilter);
+            return compile.buildImage(dataFilter);
             break;
     }
 
     return str;
 }
-
-function buildByKey(key, val) {
+compile.buildByKey = function (key, val) {
     key = key.split('|');
     key[0] = key[0].split(':');
 
@@ -153,7 +171,7 @@ function buildByKey(key, val) {
 
     if (!dataLength) {
         if (keyLength) {
-            key = buildByVal(keyType + ':' + keyLength);
+            key = compile.buildByVal(keyType + ':' + keyLength);
         }
     } else {
         dataLength = dataLength.split('-');
@@ -170,12 +188,12 @@ function buildByKey(key, val) {
             }
         } else {
             for (; i < il; i++) {
-                result.push(buildByVal(val));
+                result.push(compile.buildByVal(val));
             }
         }
 
         if (keyLength) {
-            key = buildByVal(keyType + ':' + keyLength);
+            key = compile.buildByVal(keyType + ':' + keyLength);
         } else {
             key = keyType;
         }
@@ -186,26 +204,7 @@ function buildByKey(key, val) {
         return [key, compile(val)];
     }
 
-    return [key, buildByVal(val)];
-}
-
-function compile(template) {
-    var result = {}, item;
-
-    _.forOwn(template, function (val, key) {
-        if (~key.indexOf(':') || ~key.indexOf('|')) {
-            item = buildByKey(key, val);
-            result[item[0]] = item[1];
-        } else {
-            if (_.isObject(val)) {
-                result[key] = compile(val);
-            } else {
-                result[key] = buildByVal(val);
-            }
-        }
-    });
-
-    return result;
+    return [key, compile.buildByVal(val)];
 }
 
 module.exports = compile;
