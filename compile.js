@@ -11,10 +11,10 @@ var Canvas = require('canvas'),
     canvas = new Canvas(200, 200),
     ctx = canvas.getContext('2d');
 
-function compile(template) {
-    var result = {}, item;
-
-    _.forOwn(template, function (val, key) {
+function compileObj (obj) {
+    var item = null;
+    var result = {};
+    _.forOwn(obj, function (val, key) {
         if (~key.indexOf(':') || ~key.indexOf('|')) {
             item = compile.buildByKey(key, val);
             result[item[0]] = item[1];
@@ -28,6 +28,35 @@ function compile(template) {
     });
 
     return result;
+}
+
+function compile(template) {
+
+    if (Array.isArray(template)) {
+        var filter = template[1], minl, maxl;
+        if (filter) {
+            filter = filter.split('-');
+            if (filter.length === 1) {
+                filter[1] = filter[0];
+            }
+            minl = +filter[0];
+            maxl = +filter[1];
+
+        } else {
+            minl = 1;
+            maxl = 20
+        }
+        var i = 0, il = _.random(minl, maxl);
+        var result = [];
+
+        for (; i < il; i++) {
+            result.push(compileObj(template[0]));
+        }
+
+        return result
+    }
+
+    return compileObj(template);
 }
 
 compile.replace = function  (source, origin) {
@@ -83,6 +112,14 @@ compile.getImageSize = function  (dataFilter) {
 }
 
 compile.buildString = function  (min, max) {
+    if (!max && min) {
+        max = Math.abs(min);
+        min = 0;
+    } else {
+        min = Math.abs(min) || 10;
+        max = Math.abs(max) || 10;
+    }
+
     var length = _.random(min, max);
     while (plen < length) {
         paragraph += paragraph;
@@ -93,6 +130,13 @@ compile.buildString = function  (min, max) {
     return paragraph.slice(start, start + length);
 }
 compile.buildNumber = function  (min, max, dataFilter) {
+    if (min && !max) {
+        max = min;
+        min = 0;
+    } else {
+        min = min || 0;
+        max = max || 10;
+    }
     var length = _.random(min, max) - 1;
     var num = _.random(0.0, 0.8);
     num += 0.1;
