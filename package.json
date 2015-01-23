@@ -29,8 +29,8 @@
     "url": "https://github.com/DaniloShan/Nebula-Mock/issues"
   },
   "devDependencies": {
+    "canvas": "^1.1.6",
     "gulp": "^3.8.10",
-    "gulp-util": "^3.0.2",
     "lodash": "^2.4.1",
     "mocha": "^2.1.0",
     "moment": "^2.9.0",

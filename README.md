@@ -10,7 +10,7 @@ npm install --save-dev gulp-mock
 
 ## Usage
 
-> All mock template **must** put in the source path. 
+> All mock template **must** put in the source path.
 > All mocked files would be in the api path.
 > apiPath, sourcePath, dirName are required.
 
@@ -91,7 +91,7 @@ Mocked data would like this:
       4.997925737872,
       4.765942785888
     ],
-    array: [ 
+    array: [
       "oeverymajo", // "String:7-12" Should return a string, the string's length should within 7 to 12.
       "utplaysnbson",
       "lationabo",
