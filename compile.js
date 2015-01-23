@@ -1,10 +1,8 @@
-// TODO: unit test
 // TODO: docs
 // TODO: zh support
 
 var _ = require('lodash');
 var moment = require('moment');
-var cache = {};
 var paragraph = 'williamshakespeareaprilbaptisedaprilnbwasanenglishpoetplaywrightandactorwidelyregardedasthegreatestwriterintheenglishlanguageandtheworldspreeminentdramatistheisoftencalledenglandsnationalpoetandthebardofavonnbhisextantworksincludingsomecollaborationsconsistofaboutplaysnbsonnetstwolongnarrativepoemsandafewotherversesofwhichtheauthorshipofsomeisuncertainhisplayshavebeentranslatedintoeverymajorlivinglanguageandareperformedmoreoftenthanthoseofanyotherplaywrightshakespearewasbornandbroughtupinstratforduponavonattheageofhemarriedannehathawaywithwhomhehadthreechildren:susannaandtwinshamnetandjudithbetweenandhebeganasuccessfulcareerinlondonasanactorwriterandpartownerofaplayingcompanycalledthelordchamberlainsmenlaterknownasthekingsmenheappearstohaveretiredtostratfordaroundatagewherehediedthreeyearslaterfewrecordsofshakespearesprivatelifesurviveandtherehasbeenconsiderablespeculationaboutsuchmattersashisphysicalappearancesexualityreligiousbeliefsandwhethertheworksattributedtohimwerewrittenbyothersshakespeareproducedmostofhisknownworkbetweenandnbhisearlyplaysweremainlycomediesandhistoriesandtheseworksremainregardedassomeofthebestworkproducedinthesegenreshethenwrotemainlytragediesuntilaboutincludinghamletkinglearothelloandmacbethconsideredsomeofthefinestworksintheenglishlanguageinhislastphasehewrotetragicomediesalsoknownasromancesandcollaboratedwithotherplaywrightsmanyofhisplayswerepublishedineditionsofvaryingqualityandaccuracyduringhislifetimeinjohnhemingesandhenrycondelltwofriendsandfellowactorsofshakespearepublishedthefirstfolioacollectededitionofhisdramaticworksthatincludedallbuttwooftheplaysnowrecognisedasshakespearesitwasprefacedwithapoembybenjonsoninwhichshakespeareishailedprescientlyasnotofanagebutforalltimeinthethandstcenturyhisworkhasbeenrepeatedlyadoptedandrediscoveredbynewmovementsinscholarshipandperformancehisplaysremainhighlypopulartodayandareconstantlystudiedperformedandreinterpretedindiverseculturalandpoliticalcontextsthroughouttheworld';
 var plen = paragraph.length;
 var Canvas = require('canvas'),
@@ -111,7 +109,7 @@ compile.getImageSize = function  (dataFilter) {
     return [width, height];
 }
 
-compile.buildString = function  (min, max) {
+compile.buildString = function  (min, max, dataFilter) {
     if (!max && min) {
         max = Math.abs(min);
         min = 0;
@@ -126,8 +124,11 @@ compile.buildString = function  (min, max) {
         plen = paragraph.length
     }
     var start = _.random(plen - length - 1);
-
-    return paragraph.slice(start, start + length);
+    var result = paragraph.slice(start, start + length);
+    if (dataFilter) {
+        result = compile.replace(result, dataFilter);
+    }
+    return result;
 }
 compile.buildNumber = function  (min, max, dataFilter) {
     if (min && !max) {
@@ -165,7 +166,6 @@ compile.buildImage = function  (dataFilter) {
     return canvas.toDataURL('image/png');
 }
 compile.buildByVal = function (str) {
-    if (cache[str]) return cache[str];
     if (!str) return str;
 
     var arrStr = str.split('|');
@@ -189,7 +189,7 @@ compile.buildByVal = function (str) {
 
     switch (dataType) {
         case 'String':
-            return compile.buildString(lenMin, lenMax);
+            return compile.buildString(lenMin, lenMax, dataFilter);
             break;
         case 'Number':
             return compile.buildNumber(lenMin, lenMax, dataFilter);

@@ -1,5 +1,4 @@
 var gulp = require('gulp'),
-    gutil = require('gulp-util'),
     through = require('through2'),
     fs = require('fs');
 
@@ -21,7 +20,8 @@ function mock() {
 mock.config = function (o) {
     opt = o || {
         apiPath: '',
-        dirName: ''
+        dirName: '',
+        sourcePath: ''
     };
 };
 
@@ -42,23 +42,22 @@ mock.middleware = function (connect) {
                     res.setHeader('content-type', 'application/javascript');
                 }
 
-                var readStream = fs.createReadStream(pathname.replace(opt.apiPath, 'source'));
+                return fs.createReadStream(pathname.replace(opt.apiPath, opt.sourcePath))
+                    .pipe(through.obj(function (file, env, cb) {
 
-                return readStream.pipe(through.obj(function (file, env, cb) {
+                        if (cbName) {
+                            tmpFile = 'typeof ' + cbName + ' === "function" && '
+                            + cbName + '(' + JSON.stringify(compile(JSON.parse(file.toString()))) + ');';
+                        } else {
+                            tmpFile = JSON.stringify(compile(JSON.parse(file.toString())));
+                        }
 
-                    if (cbName) {
-                        tmpFile = 'typeof ' + cbName + ' === "function" && '
-                        + cbName + '(' + JSON.stringify(compile(JSON.parse(file.toString()))) + ');';
-                    } else {
-                        tmpFile = JSON.stringify(compile(JSON.parse(file.toString())));
-                    }
-
-                    fs.writeFile(pathname, tmpFile, function (err) {
-                        if (err) throw err;
-                        cb();
-                        next();
-                    });
-                }));
+                        fs.writeFile(pathname, tmpFile, function (err) {
+                            if (err) throw err;
+                            cb();
+                            next();
+                        });
+                    }));
             }
             next();
         })

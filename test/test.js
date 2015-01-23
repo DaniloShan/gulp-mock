@@ -6,7 +6,7 @@ var compile = require('../compile');
 var Canvas = require('canvas'),
     img = new Canvas.Image();
 
-describe('gulp-mock', function () {
+describe('test gulp-mock', function () {
 
     describe('compile private helper', function () {
         it('compile.replace', function () {
@@ -142,91 +142,109 @@ describe('gulp-mock', function () {
     });
 
     describe('compile main function', function () {
-        it('should return a mocked JSON', function () {
-            var date = new Date();
-            var today = date.getFullYear() + ':' + (date.getMonth() + 1 < 10
-                    ? '0' + (date.getMonth() + 1)
-                    : date.getMonth() + 1) + ':' + date.getDate();
+        var date = new Date();
+        var today = date.getFullYear() + ':' + (date.getMonth() + 1 < 10
+                ? '0' + (date.getMonth() + 1)
+                : date.getMonth() + 1) + ':' + date.getDate();
 
-            compile({
-                "testArray|2-5": {}
-            }).testArray.should.be.a.Array;
-            compile({
-                "testArray|2-5": {}
-            }).testArray.length.should.be.within(2, 5);
+        describe('compile by key and value', function () {
+            it('compile by key should work and type should be Array and length should be within 2 and 5', function () {
+                compile({
+                    "testArray|2-5": {}
+                }).testArray.should.be.a.Array;
+                compile({
+                    "testArray|2-5": {}
+                }).testArray.length.should.be.within(2, 5);
+                compile({
+                    "testArray|2-5": {
+                        "tels|2-5": "Number:13|x.xxxxxxxxxxxxxxx"
+                    }
+                }).testArray[0].tels.should.be.a.Array;
+                compile({
+                    "testArray|2-5": {
+                        "tels|2-5": "Number:13|x.xxxxxxxxxxxxxxx"
+                    }
+                }).testArray.length.should.be.within(2, 5);
+            });
+            it('compile by value should work and type should be number', function () {
+                compile({
+                    "testArray|2-5": {
+                        "tels|2-5": "Number:13|x.xxxxxxxxxxxxxxx"
+                    }
+                }).testArray[0].tels.length.should.be.within(2, 5);
+                compile({
+                    "testArray|2-5": {
+                        "tels|2-5": "Number:13|x.xxxxxxxxxxxxxxx"
+                    }
+                }).testArray[0].tels[0].should.be.a.Number;
+            });
+        });
 
-            compile({
-                "testArray|2-5": {
-                    "tels|2-5": "Number:13|x.xxxxxxxxxxxxxxx"
-                }
-            }).testArray.length.should.be.within(2, 5);
-            compile({
-                "testArray|2-5": {
-                    "tels|2-5": "Number:13|x.xxxxxxxxxxxxxxx"
-                }
-            }).testArray[0].tels.should.be.a.Array;
-            compile({
-                "testArray|2-5": {
-                    "tels|2-5": "Number:13|x.xxxxxxxxxxxxxxx"
-                }
-            }).testArray[0].tels.length.should.be.within(2, 5);
-            compile({
-                "testArray|2-5": {
-                    "tels|2-5": "Number:13|x.xxxxxxxxxxxxxxx"
-                }
-            }).testArray[0].tels[0].should.be.a.Number;
+        describe('compile array', function () {
+            it('should return a array', function () {
+                compile([{
+                    "data": "String:2-5"
+                }]).should.be.a.Array;
+            });
 
-            compile([{
-                "data": "String:2-5"
-            }]).should.be.a.Array;
-            compile([{
-                "data": "String:2-5"
-            }]).length.should.be.within(1, 20);
+            it('length should be within 1 and 20', function () {
+                compile([{
+                    "data": "String:2-5"
+                }]).length.should.be.within(1, 20);
+            });
 
-            compile([{
-                "data": "String:2-5"
-            }, "5-10"]).length.should.be.within(5, 10);
+            it('length should be within 5 and 10', function () {
+                compile([{
+                    "data": "String:2-5"
+                }, "5-10"]).length.should.be.within(5, 10);
+            });
 
-            compile([{
-                "data": "String:2-5"
-            }, "5"]).length.should.be.eql(5);
+            it('length should qeual to 5', function () {
+                compile([{
+                    "data": "String:2-5"
+                }, "5"]).length.should.be.eql(5);
+            });
+        });
 
-            var template = {
-                "data|2-10": {
-                    "code": "String:7",
-                    "percent": "String:7-12",
-                    "tels|2-5": "Number:13|x.xxxxxxxxxxxxxxx",
-                    "array|5-10": "String:7",
-                    "time": "Date|YYYY:MM:DD",
-                    "family|2-5": {
-                        "name": "String:7",
-                        "time": "String:7"
-                    },
-                    "avatar": "Image|200x200"
-                }
-            };
-            var result = compile(template);
+        describe('compile whole data', function () {
+            it('should return a mocked JSON', function () {
+                var template = {
+                    "data|2-10": {
+                        "code": "String:7",
+                        "percent": "String:7-12",
+                        "tels|2-5": "Number:13|x.xxxxxxxxxxxxxxx",
+                        "array|5-10": "String:7",
+                        "time": "Date|YYYY:MM:DD",
+                        "family|2-5": {
+                            "name": "String:7",
+                            "time": "String:7"
+                        },
+                        "avatar": "Image|200x200"
+                    }
+                };
+                var result = compile(template);
 
-            result.data.should.be.a.Array;
-            result.data.length.should.be.within(2, 10);
+                result.data.should.be.a.Array;
+                result.data.length.should.be.within(2, 10);
 
-            result.data[0].code.should.be.a.String;
-            result.data[0].code.length.should.eql(7);
+                result.data[0].code.should.be.a.String;
+                result.data[0].code.length.should.eql(7);
 
-            result.data[0].percent.should.be.a.String;
-            result.data[0].percent.length.should.within(7, 12);
+                result.data[0].percent.should.be.a.String;
+                result.data[0].percent.length.should.within(7, 12);
 
-            result.data[0].tels.should.be.a.Array;
-            result.data[0].tels.length.should.within(2, 5);
-            result.data[0].tels[0].should.within(0, 10);
+                result.data[0].tels.should.be.a.Array;
+                result.data[0].tels.length.should.within(2, 5);
+                result.data[0].tels[0].should.within(0, 10);
 
-            result.data[0].time.should.be.eql(today);
+                result.data[0].time.should.be.eql(today);
 
-            result.data[0].avatar.indexOf('data:image/png;base64,').should.be.eql(0);
-            img.src = result.data[0].avatar;
-            img.width.should.be.eql(200);
-            img.height.should.be.eql(200);
+                result.data[0].avatar.indexOf('data:image/png;base64,').should.be.eql(0);
+                img.src = result.data[0].avatar;
+                img.width.should.be.eql(200);
+                img.height.should.be.eql(200);
 
+            });
         });
     });
 
