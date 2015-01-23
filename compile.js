@@ -1,4 +1,3 @@
-// TODO: docs
 // TODO: zh support
 
 var _ = require('lodash');

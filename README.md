@@ -80,7 +80,7 @@ gulp.task('server', function () {
 }
 ```
 Mocked data would like this:
-
+> Date filter use momment.js, see [docs](http://momentjs.com/docs/)
 ```js
 {
   data: [{ // "data|2-10" Should return a array, the array's length should within 2 to 10
