@@ -2,7 +2,9 @@ gulp-mock
 ===
 > Gulp plugin to mock data (for test you know).
 
-## Install
+> [中文](https://github.com/DaniloShan/gulp-mock/wiki)
+
+## Installation
 
 ```text
 npm install --save-dev gulp-mock
@@ -10,8 +12,10 @@ npm install --save-dev gulp-mock
 
 ## Usage
 
-> All mock template **must** put in the source path.
-> All mocked files would be in the api path.
+> All mock template **must** be putted in the source path.
+
+> All mocked files would be putted in the api path.
+
 > apiPath, sourcePath, dirName are required.
 
 ```js
@@ -24,8 +28,8 @@ const sourcePath = 'source';
 const apiPath = 'api';
 
 mock.config({
-    sourcePath: sourcePath, // Mock template should put here. e.g: source/path/to/foo.json
-    apiPath: apiPath, // Mocked files would be this path. e.g: api/path/to/foo.json
+    sourcePath: sourcePath, // Mock template should be here. e.g: source/path/to/foo.json
+    apiPath: apiPath, // Mocked files would be putted in this path. e.g: api/path/to/foo.json
     dirName: __dirname
 });
 
