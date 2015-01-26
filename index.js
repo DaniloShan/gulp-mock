@@ -1,6 +1,6 @@
-var gulp = require('gulp'),
-    through = require('through2'),
-    fs = require('fs');
+var through = require('through2'),
+    fs = require('fs'),
+    path = require('path');
 
 var compile = require('./compile.js');
 var opt = {};
@@ -29,11 +29,19 @@ mock.middleware = function (connect) {
     return connect()
         .use(connect.query())
         .use(function (req, res, next) {
-            var reg = new RegExp('\/' + (opt.apiPath));
+            var reg = new RegExp(path.sep + (opt.apiPath));
             var apiMatch = req.url.match(reg);
             var query = req.query;
             var tmpFile = '';
             var pathname = opt.dirName + req._parsedUrl.pathname;
+
+            path.dirname(req._parsedUrl.pathname).split(path.sep).reduce(function (prev, curr) {
+                var tmp = opt.dirName + prev + path.sep + curr;
+                if (!fs.existsSync(tmp)) {
+                    fs.mkdirSync(tmp);
+                }
+                return prev + path.sep + curr;
+            });
 
             if (apiMatch && apiMatch.length && apiMatch.index === 0) {
                 var cbName = query.cb || query.callback;
@@ -51,7 +59,6 @@ mock.middleware = function (connect) {
                         } else {
                             tmpFile = JSON.stringify(compile(JSON.parse(file.toString())));
                         }
-
                         fs.writeFile(pathname, tmpFile, function (err) {
                             if (err) throw err;
                             cb();

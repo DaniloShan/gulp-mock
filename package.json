@@ -1,6 +1,6 @@
 {
   "name": "gulp-mock",
-  "version": "0.0.2",
+  "version": "0.1.1",
   "description": "Just mock data for test.",
   "main": "index.js",
   "scripts": {
@@ -20,17 +20,16 @@
   "engines": {
     "node": ">= 0.9"
   },
-  "homepage": "https://github.com/DaniloShan/Nebula-Mock",
+  "homepage": "https://github.com/DaniloShan/gulp-mock",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DaniloShan/Nebula-Mock.git"
+    "url": "https://github.com/DaniloShan/gulp-mock.git"
   },
   "bugs": {
-    "url": "https://github.com/DaniloShan/Nebula-Mock/issues"
+    "url": "https://github.com/DaniloShan/gulp-mock/issues"
   },
-  "devDependencies": {
+  "dependencies": {
     "canvas": "^1.1.6",
-    "gulp": "^3.8.10",
     "lodash": "^2.4.1",
     "mocha": "^2.1.0",
     "moment": "^2.9.0",
